@@ -10,42 +10,73 @@ import UIKit
 class ViewController: UIViewController {
     
     private var loginVM = LoginViewModel()
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        setupUI()
-    }
-
-    @objc func login() {
-        print(loginVM.username)
-        print(loginVM.password)
-    }
     
-    private func setupUI() {
-        let usernameTextField = BindingTextField()
+    lazy var usernameTextField : UITextField = {
+       let usernameTextField = BindingTextField()
         usernameTextField.placeholder = "Enter username"
         usernameTextField.backgroundColor = UIColor.lightGray
         usernameTextField.borderStyle = .roundedRect
         usernameTextField.bind { [weak self] text in
-            self?.loginVM.username = text
+            self?.loginVM.username.value = text
         }
         
-        let passwordTextField = BindingTextField()
-        passwordTextField.isSecureTextEntry = true
-        passwordTextField.placeholder = "Enter password"
+        return usernameTextField
+    }()
+    
+    lazy var passwordTextField : UITextField = {
+       let passwordTextField = BindingTextField()
+        passwordTextField.placeholder = "Enter username"
         passwordTextField.backgroundColor = UIColor.lightGray
         passwordTextField.borderStyle = .roundedRect
         passwordTextField.bind { [weak self] text in
-            self?.loginVM.password = text
+            self?.loginVM.username.value = text
         }
+        
+        return passwordTextField
+    }()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        loginVM.username.bind { [weak self] text in
+            self?.usernameTextField.text = text
+        }
+        
+        loginVM.password.bind { [weak self] text in
+            self?.passwordTextField.text = text
+        }
+        
+        setupUI()
+    }
+
+    @objc func login() {
+        print(loginVM.username.value)
+        print(loginVM.password.value)
+    }
+    
+    @objc func fetchLoginInfo() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.loginVM.username.value = "Alonso Rodriguez"
+            self?.loginVM.password.value = "Alonso Rodriguez"
+        }
+        
+    }
+    
+    private func setupUI() {
         
         let loginButton = UIButton()
         loginButton.setTitle("Login", for: .normal)
         loginButton.backgroundColor = UIColor.gray
+        loginButton.layer.cornerRadius = 10
         loginButton.addTarget(self, action: #selector(login), for: .touchUpInside)
         
-        let stackView = UIStackView(arrangedSubviews: [usernameTextField, passwordTextField, loginButton])
+        let fetchLoginInfoButton = UIButton()
+        fetchLoginInfoButton.setTitle("Fetch Login Info", for: .normal)
+        fetchLoginInfoButton.backgroundColor = UIColor.blue
+        fetchLoginInfoButton.layer.cornerRadius = 10
+        fetchLoginInfoButton.addTarget(self, action: #selector(fetchLoginInfo), for: .touchUpInside)
+        
+        let stackView = UIStackView(arrangedSubviews: [usernameTextField, passwordTextField, loginButton, fetchLoginInfoButton])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 20
